@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender" -->
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>log/app.log</file>
+
+        <!-- rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>log/app.%d{dd-MM-yyyy}.log</fileNamePattern>
+            <maxHistory>60</maxHistory>
+        </rollingPolicy -->
+
+        <encoder>
+            <pattern>%d [%thread] [%level] [%logger] %m%n</pattern>
+        </encoder>
+    </appender>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+        <pattern>[%level] [%logger] %5p - %m%n</pattern>
+    </encoder>
+    </appender>
+
+
+    <root level="DEBUG">
+        <appender-ref ref="STDOUT"/>
+    </root>
+    <logger name="com.optrak" level="DEBUG"/>
+    <logger name="com.optrak.scalautil" level="INFO"/>
+    <logger name="com.zaxxer.hikari" level="DEBUG"/>
+    <logger name="slick" level="INFO"/>
+    <logger name="akka.persistence" level="DEBUG"/>
+</configuration>

@@ -1,0 +1,87 @@
+package com.optrak.experimental.favouritesongs
+
+import java.nio.ByteBuffer
+
+import akka.actor.ExtendedActorSystem
+import akka.persistence.PersistentRepr
+import akka.util.ByteString
+import java.nio.charset.Charset
+import java.nio.ByteBuffer
+
+import akka.serialization.{Serializer, SerializerWithStringManifest}
+import com.optrak.scalautil.CatsBits.{HeadContext, _}
+import com.optrak.scalautil.json._
+import grizzled.slf4j.Logging
+import org.json4s.JValue
+import cats.data.Validated._
+
+
+object PersistentReprSerializer extends SimpleParsers with SimpleWriters {
+  val UTF8 = Charset.forName("UTF-8")
+
+  val Identifier: Int = ByteBuffer.wrap("PersistentRepr".getBytes(UTF8)).getInt
+
+  case class Mapping(payload: FavouritesListCommand,
+                     sequenceNr: Long,
+                     persistenceId: String,
+                     manifest: String,
+                     deleted: Boolean,
+                     senderName: String,
+                     writerUuid: String) //why not make a serializer for actorRef that acts the same as in PersistentReprJsonRW
+
+  val mappingParser = JsonParser[Mapping]
+  val mappingWriter = JsonWriter[Mapping]
+
+  class PersistentReprJsonRW(val system: ExtendedActorSystem) {
+    val persistentReprParser = new JsonParser[PersistentRepr] {
+      def parse(n: JValue)(implicit ctx: ValidationContext) = {
+        mappingParser.parse(n).map { x =>
+          val sender = system.provider.resolveActorRef(x.senderName)
+          PersistentRepr(x.payload, x.sequenceNr, x.persistenceId, x.manifest, x.deleted, sender, x.writerUuid)
+        }
+      }
+    }
+
+    val persistentReprWriter = new JsonWriter[PersistentRepr] {
+      def write(nameOpt: Option[String], pr: PersistentRepr) = {
+        val senderName = pr.sender.path.toSerializationFormat
+        val mapping = Mapping(pr.payload.asInstanceOf[FavouritesListCommand], pr.sequenceNr, pr.persistenceId,
+          pr.manifest, pr.deleted, senderName, pr.writerUuid)
+        mappingWriter.write(None, mapping)
+      }
+    }
+
+  }
+
+}
+
+
+class PersistentReprSerializer(val system: ExtendedActorSystem) extends Serializer with Logging {
+  import PersistentReprSerializer._
+  import org.json4s.jackson.JsonMethods._
+
+  def identifier = Identifier
+
+  def includeManifest = false
+
+  val prs = new PersistentReprJsonRW(system)
+
+  def fromBinary(bytes: Array[Byte], manifest: Option[Class[_]]): AnyRef = {
+    val json = parse(new String(bytes, UTF8))
+    implicit val headCtx = HeadContext("parsing PersistentRepr")
+    prs.persistentReprParser.parse(json) match {
+      case Valid(v) => v
+      case Invalid(f) => throw new Exception(f.toString)
+    }
+  }
+
+  def toBinary(o: AnyRef): Array[Byte] = {
+    val writtenEventJson = (render _ andThen pretty _)(
+      prs.persistentReprWriter.write(None, o.asInstanceOf[PersistentRepr])
+    )
+    logger.debug(s"written event was \n$writtenEventJson")
+    writtenEventJson.getBytes(UTF8)
+  }
+
+}
+
