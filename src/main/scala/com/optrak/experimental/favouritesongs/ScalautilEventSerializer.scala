@@ -1,3 +1,4 @@
+/*
 package com.optrak.experimental.favouritesongs
 
 import java.nio.charset.StandardCharsets
@@ -59,3 +60,4 @@ class ScalautilEventSerializer extends SerializerWithStringManifest {
   }
 }
 
+*/
