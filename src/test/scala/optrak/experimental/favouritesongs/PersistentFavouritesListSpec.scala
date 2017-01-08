@@ -1,11 +1,12 @@
-package com.optrak.experimental.favouritesongs
+package optrak.experimental.favouritesongs
 
 import akka.actor.{ActorSystem, PoisonPill, Props}
-import com.optrak.experimental.favouritesongs.model.{Band, Musician, Song}
-import com.optrak.opkakka.test.TestKitSpec
+import optrak.experimental.favouritesongs.model.{Band, Musician}
+import optrak.scalautils.test.TestKitSpec
 import org.specs2.mutable.SpecificationLike
 import cats.implicits._
 import grizzled.slf4j.Logging
+import optrak.experimental.favouritesongs.model.Song
 
 class PersistentFavouritesListSpec extends TestKitSpec(ActorSystem("FavListTestSystem")) with SpecificationLike with Logging {
   val oasis = Band("Oasis", Set(Musician("Noel", "Gallagher".some), Musician("Liam", "Gallagher".some), Musician("Bonehead", None)))

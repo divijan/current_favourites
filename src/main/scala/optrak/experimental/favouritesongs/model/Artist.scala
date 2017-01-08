@@ -1,4 +1,4 @@
-package com.optrak.experimental.favouritesongs.model
+package optrak.experimental.favouritesongs.model
 
 sealed trait Artist
 

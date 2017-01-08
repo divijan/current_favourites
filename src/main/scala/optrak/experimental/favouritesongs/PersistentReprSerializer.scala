@@ -9,14 +9,15 @@ import java.nio.charset.Charset
 import java.nio.ByteBuffer
 
 import akka.serialization.{Serializer, SerializerWithStringManifest}
-import com.optrak.scalautil.CatsBits.{HeadContext, _}
-import com.optrak.scalautil.json._
+import optrak.scalautils.validating.ErrorReports._
+import optrak.scalautils.json._
 import grizzled.slf4j.Logging
 import org.json4s.JValue
 import cats.data.Validated._
+import optrak.experimental.favouritesongs.FavouritesListCommand
 
 
-object PersistentReprSerializer extends SimpleParsers with SimpleWriters {
+object PersistentReprSerializer extends SimpleJsonParsers with SimpleJsonWriters {
   val UTF8 = Charset.forName("UTF-8")
 
   val Identifier: Int = ByteBuffer.wrap("PersistentRepr".getBytes(UTF8)).getInt
@@ -95,5 +96,3 @@ class PersistentReprSerializer(val system: ExtendedActorSystem) extends Serializ
   }
 
 }
-
-

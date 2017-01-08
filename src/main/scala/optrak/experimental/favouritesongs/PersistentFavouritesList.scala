@@ -1,7 +1,8 @@
-package com.optrak.experimental.favouritesongs
+package optrak.experimental.favouritesongs
 
 import akka.persistence.PersistentActor
-import com.optrak.experimental.favouritesongs.model.{Artist, Song}
+import optrak.experimental.favouritesongs.model.Artist
+import optrak.experimental.favouritesongs.model.Song
 
 sealed trait FavouritesListCommand
 
